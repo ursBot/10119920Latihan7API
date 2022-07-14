@@ -74,8 +74,9 @@ public class ListViewAdapter extends BaseAdapter {
     public void filter(String charText) {
         charText = charText.toLowerCase(Locale.getDefault());
         if (charText.length() == 0) {
-
+            kotaList.addAll(arrayList);
         } else {
+            //kotaList.clear();
             for (NamaKota wp : arrayList) {
                 if (wp.getNamaKota().toLowerCase(Locale.getDefault()).contains(charText)) {
                     kotaList.add(wp);

@@ -40,7 +40,8 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private RequestQueue myQueue3;
     private String getNamaKota, getIdKota;
 
-    public static final String ID_EXTRA_MSG = "com.apps.a10119920latihan7api.MSG";
+    public static final String ID_EXTRA_MSG1 = "getKota";
+    public static final String ID_EXTRA_MSG2 = "getID";
 
     @RequiresApi(api = Build.VERSION_CODES.N)
 
@@ -72,23 +73,24 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         list.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
                 NamaKota item = adapter.getItem(i);
 
                 //getNamaKota = item.getNamaKota();
-                getNamaKota = list.getItemAtPosition(i).toString();
-                Log.d("debugggg", String.valueOf(list));
+                getNamaKota = (list.getItemAtPosition(i).toString());
+                String selectedFromList =(list.getItemAtPosition(i).toString());
+                Log.d("debugggg kota", String.valueOf(selectedFromList));
 
                 for(int j = 0; j < kotaList.length; j++){
-                    if(kotaList[j].equals(getNamaKota)){
+                    if(kotaList[j].equals("Bandung")){
                         getIdKota = String.valueOf(Arrays.asList(kotaList).indexOf(kotaList[j]+1));
-                        Log.d("debugggg", getIdKota);
+                        Log.d("debugggg id", getIdKota);
                     }
                 }
 
-
                 Intent intent = new Intent(MainActivity.this,JadwalActivity.class);
-                intent.putExtra(ID_EXTRA_MSG, getNamaKota);
-                intent.putExtra(ID_EXTRA_MSG, getIdKota);
+                intent.putExtra(ID_EXTRA_MSG1, getNamaKota);
+                intent.putExtra(ID_EXTRA_MSG2, getIdKota);
                 //based on item add info to intent
                 startActivity(intent);
             }

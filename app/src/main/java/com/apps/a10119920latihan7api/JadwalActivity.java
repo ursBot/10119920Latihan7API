@@ -87,6 +87,12 @@ public class JadwalActivity extends AppCompatActivity{
         myQueue2 = Volley.newRequestQueue(this);
 
         button = findViewById(R.id.ButtonGantiKota);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(JadwalActivity.this,MainActivity.class));
+            }
+        });
 
         getRequest();
         getRequest2();
@@ -288,7 +294,7 @@ public class JadwalActivity extends AppCompatActivity{
 
     private void bindExtra(){
         Intent intent = getIntent();
-        kota = intent.getStringExtra(MainActivity.ID_EXTRA_MSG);
+        kota = intent.getStringExtra(MainActivity.ID_EXTRA_MSG1);
         textKota.setText(kota);
     }
 
