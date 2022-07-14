@@ -9,6 +9,7 @@ import android.graphics.Typeface;
 import android.icu.text.SimpleDateFormat;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -44,7 +45,7 @@ public class JadwalActivity extends AppCompatActivity{
     private TextView textSolat, textJam, jamKecil;
     private TextView hariIni, textKota;
 
-    private String kota;
+    private String kota, id;
 
     private RequestQueue myQueue, myQueue2;
 
@@ -94,19 +95,16 @@ public class JadwalActivity extends AppCompatActivity{
             }
         });
 
+        bindExtra();
         getRequest();
         getRequest2();
-        bindExtra();
-
     }
-
-    public static String idKota="14";
 
     private void getRequest(){
         String currentYear = new SimpleDateFormat("yyyy").format(new Date());
         String currentMonth = new SimpleDateFormat("MM").format(new Date());
         String currentDay = new SimpleDateFormat("dd").format(new Date());
-        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+currentDay+"&cityId="+idKota;
+        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+currentDay+"&cityId="+id;
         String pattern = "HH:mm";
         SimpleDateFormat sdf = new SimpleDateFormat(pattern);
         String currentDateandTime = sdf.format(new Date());
@@ -237,7 +235,7 @@ public class JadwalActivity extends AppCompatActivity{
         String currentYear = new SimpleDateFormat("yyyy").format(tomorrow);
         String currentMonth = new SimpleDateFormat("MM").format(tomorrow);
         String currentDay = new SimpleDateFormat("dd").format(tomorrow);
-        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+currentDay+"&cityId="+idKota;
+        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+currentDay+"&cityId="+id;
         String pattern = "HH:mm";
         SimpleDateFormat sdf = new SimpleDateFormat(pattern);
         String currentDateandTime = sdf.format(tomorrow);
@@ -297,6 +295,8 @@ public class JadwalActivity extends AppCompatActivity{
         Intent intent = getIntent();
         kota = intent.getStringExtra(MainActivity.ID_EXTRA_MSG1);
         textKota.setText(kota);
+
+        id = intent.getStringExtra(MainActivity.ID_EXTRA_MSG2);
     }
 
 }

@@ -36,8 +36,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     ListView list;
     ListViewAdapter adapter;
     SearchView search;
-    //String[] kotaList;
-    ArrayList<String> kotaList = new ArrayList<>();
+    String[] kotaList;
     ArrayList<NamaKota> arrayList = new ArrayList<>();
 
     private RequestQueue myQueue3;
@@ -80,13 +79,17 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 NamaKota item = adapter.getItem(i);
                 getNamaKota = item.getNamaKota();
 
-                for(int j = 0; j < kotaList.size(); j++){
-                    if(kotaList.get(j).equals(getNamaKota)){
+                //getIdKota = String.valueOf(Arrays.asList(kotaList).indexOf(getNamaKota));
+                //Log.d("debugggg kotaJSON", Arrays.asList(kotaList));
+
+                for(int j = 0; j < kotaList.length; j++){
+                    //String s = kotaList[j];
+                    if(kotaList[j].equals("["+getNamaKota+"]")){
                         getIdKota = String.valueOf(j+1);
                     }
+                    //Log.d("debugggg kotaJSON", Arrays.toString(kotaList));
                 }
-
-
+                //Log.d("debugggg kotaJSON", Arrays.toString(kotaList));
                 Intent intent = new Intent(MainActivity.this,JadwalActivity.class);
                 intent.putExtra(ID_EXTRA_MSG1, getNamaKota);
                 intent.putExtra(ID_EXTRA_MSG2, getIdKota);
@@ -111,34 +114,37 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
                             String namaKotaJSON = null;
                             JSONArray array = response.getJSONArray("data");
+                            //kotaList = new String[array.length()];
 
                             for(int i=0; i<array.length(); i++){
                                 JSONObject data = array.getJSONObject(i);
                                 namaKotaJSON = data.getString("cityName");
+                                //ring s = namaKotaJSON;
+                                kotaList = new String[]{namaKotaJSON};
+                                //kotaList[i]=namaKotaJSON;
+                                /**for(String s: kotaList){
+                                    Log.d("debugggg tes", s);
+                                }*/
+                                //kotaList[i] = namaKotaJSON;
 
-                                kotaList.add(namaKotaJSON);
+
 
                                 Log.d("debugggg kotaJSON", String.valueOf(kotaList));
                                 //kotaList[i] = namaKotaJSON;
                                 //Log.d("debugggg kotaJSON", String.valueOf(namaKotaJSON));
-                                //Log.d("debugggg kotaJSON", String.valueOf(kotaList));
+                                //Log.d("debugggg kotaJSON", Arrays.toString(kotaList));
 
-                                for (int j = 0; j < kotaList.size(); j++) {
+                                for (int j = 0; j < kotaList.length; j++) {
 
-                                    NamaKota namaKota = new NamaKota(kotaList.get(j));
+                                    NamaKota namaKota = new NamaKota(kotaList[j]);
                                     // Binds all strings into an array
                                     //Log.d("debugggg kotaJSON", namaKota.getNamaKota());
 
                                     arrayList.add(namaKota);
                                     //Log.d("debugggg kotaJSON", String.valueOf(namaKota));
                                 }
-
-                                /**if(namaKotaJSON.equals(search)){
-                                    String idKota = data.getString("cityId");
-                                    String namaKota = namaKotaJSON;
-                                }*/
-
                             }
+
 
                         } catch (JSONException e) {
                             e.printStackTrace();
