@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     SearchView search;
     String[] kotaList;
     ArrayList<NamaKota> arrayList = new ArrayList<>();
+    ArrayList<String> kotaArrayList = new ArrayList<>();
 
     private RequestQueue myQueue3;
     private String getNamaKota, getIdKota;
@@ -79,21 +80,11 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                 NamaKota item = adapter.getItem(i);
                 getNamaKota = item.getNamaKota();
 
-                //getIdKota = String.valueOf(Arrays.asList(kotaList).indexOf(getNamaKota));
-                //Log.d("debugggg kotaJSON", Arrays.asList(kotaList));
+                getIdKota = String.valueOf(kotaArrayList.indexOf(getNamaKota)+1);
 
-                for(int j = 0; j < kotaList.length; j++){
-                    //String s = kotaList[j];
-                    if(kotaList[j].equals("["+getNamaKota+"]")){
-                        getIdKota = String.valueOf(j+1);
-                    }
-                    //Log.d("debugggg kotaJSON", Arrays.toString(kotaList));
-                }
-                //Log.d("debugggg kotaJSON", Arrays.toString(kotaList));
                 Intent intent = new Intent(MainActivity.this,JadwalActivity.class);
                 intent.putExtra(ID_EXTRA_MSG1, getNamaKota);
                 intent.putExtra(ID_EXTRA_MSG2, getIdKota);
-                //based on item add info to intent
                 startActivity(intent);
             }
         });
@@ -121,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                                 namaKotaJSON = data.getString("cityName");
                                 //ring s = namaKotaJSON;
                                 kotaList = new String[]{namaKotaJSON};
+                                kotaArrayList.add(namaKotaJSON);
                                 //kotaList[i]=namaKotaJSON;
                                 /**for(String s: kotaList){
                                     Log.d("debugggg tes", s);
@@ -129,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
 
 
-                                Log.d("debugggg kotaJSON", String.valueOf(kotaList));
+                                //Log.d("debugggg kotaJSON", String.valueOf(kotaList));
                                 //kotaList[i] = namaKotaJSON;
                                 //Log.d("debugggg kotaJSON", String.valueOf(namaKotaJSON));
                                 //Log.d("debugggg kotaJSON", Arrays.toString(kotaList));
@@ -162,19 +154,15 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     @Override
     public boolean onQueryTextSubmit(String query) {
+        adapter.getFilter().filter(query);
+        adapter.RefreshList();
         return false;
     }
 
     @Override
-    public boolean onQueryTextChange(String newText) {
-        //String text = newText;
-        //adapter.filter(text);
-        if (TextUtils.isEmpty(newText)) {
-            adapter.filter("");
-            list.clearTextFilter();
-        } else {
-            adapter.filter(newText);
-        }
+    public boolean onQueryTextChange(String query) {
+        adapter.getFilter().filter(query);
+        adapter.RefreshList();
         return true;
     }
 }

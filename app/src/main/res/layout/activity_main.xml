@@ -53,7 +53,6 @@ KELAS    : IF10
         android:queryHint="Cari Kota"
         android:background="@color/silver">
 
-        <requestFocus/>
     </SearchView>
 
     <ListView

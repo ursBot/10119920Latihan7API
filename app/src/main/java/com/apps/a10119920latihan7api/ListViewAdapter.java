@@ -6,8 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.TextView;
+import android.widget.*;
 
 import com.android.volley.Response;
 
@@ -17,22 +16,43 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
-public class ListViewAdapter extends BaseAdapter {
+public class ListViewAdapter extends BaseAdapter implements Filterable {
 
-    // Declare Variables
-
-    Context mContext;
     LayoutInflater inflater;
     private List<NamaKota> kotaList;
+    private final List<NamaKota> kotaList2;
     private ArrayList<NamaKota> arrayList;
 
     public ListViewAdapter(Context context, List<NamaKota> kotaList) {
-        mContext = context;
+        kotaList2 = kotaList;
         this.kotaList = kotaList;
-        inflater = LayoutInflater.from(mContext);
+        inflater = LayoutInflater.from(context);
         this.arrayList = new ArrayList<>();
         this.arrayList.addAll(kotaList);
+    }
+
+    public void RefreshList() {
+        kotaList = kotaList2;
+    }
+
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                FilterResults result = new FilterResults();
+                result.values = kotaList.stream().filter(it -> it.getNamaKota().contains(charSequence)).collect(Collectors.toList());
+                return result;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                if (filterResults.values != null)
+                    kotaList = (List<NamaKota>) filterResults.values;
+            }
+        };
     }
 
     public class ViewHolder {
@@ -70,22 +90,6 @@ public class ListViewAdapter extends BaseAdapter {
         // Set the results into TextViews
         holder.name.setText(kotaList.get(position).getNamaKota());
         return view;
-    }
-
-    // Filter Class
-    public void filter(String charText) {
-        charText = charText.toLowerCase(Locale.getDefault());
-        //kotaList.clear();
-        if (charText.length() == 0) {
-            kotaList.addAll(arrayList);
-        } else {
-            for (NamaKota wp : arrayList) {
-                if (wp.getNamaKota().toLowerCase(Locale.getDefault()).contains(charText)) {
-                    kotaList.add(wp);
-                }
-            }
-        }
-        notifyDataSetChanged();
     }
 
 }
