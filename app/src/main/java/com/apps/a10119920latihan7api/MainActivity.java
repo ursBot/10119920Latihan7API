@@ -76,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
                 //getNamaKota = item.getNamaKota();
                 getNamaKota = list.getItemAtPosition(i).toString();
+                Log.d("debugggg", String.valueOf(list));
 
                 for(int j = 0; j < kotaList.length; j++){
                     if(kotaList[j].equals(getNamaKota)){

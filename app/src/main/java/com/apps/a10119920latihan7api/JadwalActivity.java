@@ -44,6 +44,8 @@ public class JadwalActivity extends AppCompatActivity{
     private TextView textSolat, textJam, jamKecil;
     private TextView hariIni, textKota;
 
+    private String kota;
+
     private RequestQueue myQueue, myQueue2;
 
     Button button;
@@ -284,9 +286,10 @@ public class JadwalActivity extends AppCompatActivity{
         myQueue2.add(request);
     }
 
-    @OnClick(R.id.ButtonGantiKota)
-    void mulai() {
-        Intent intent = new Intent(JadwalActivity.this, MainActivity.class);
-        startActivity(intent);
+    private void bindExtra(){
+        Intent intent = getIntent();
+        kota = intent.getStringExtra(MainActivity.ID_EXTRA_MSG);
+        textKota.setText(kota);
     }
+
 }
