@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -25,6 +26,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static java.lang.String.format;
 
@@ -34,8 +36,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     ListView list;
     ListViewAdapter adapter;
     SearchView search;
-    String[] kotaList;
-    ArrayList<NamaKota> arrayList = new ArrayList<NamaKota>();
+    //String[] kotaList;
+    ArrayList<String> kotaList = new ArrayList<>();
+    ArrayList<NamaKota> arrayList = new ArrayList<>();
 
     private RequestQueue myQueue3;
     private String getNamaKota, getIdKota;
@@ -75,18 +78,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 NamaKota item = adapter.getItem(i);
+                getNamaKota = item.getNamaKota();
 
-                //getNamaKota = item.getNamaKota();
-                getNamaKota = (list.getItemAtPosition(i).toString());
-                String selectedFromList =(list.getItemAtPosition(i).toString());
-                Log.d("debugggg kota", String.valueOf(selectedFromList));
-
-                for(int j = 0; j < kotaList.length; j++){
-                    if(kotaList[j].equals("Bandung")){
-                        getIdKota = String.valueOf(Arrays.asList(kotaList).indexOf(kotaList[j]+1));
-                        Log.d("debugggg id", getIdKota);
+                for(int j = 0; j < kotaList.size(); j++){
+                    if(kotaList.get(j).equals(getNamaKota)){
+                        getIdKota = String.valueOf(j+1);
                     }
                 }
+
 
                 Intent intent = new Intent(MainActivity.this,JadwalActivity.class);
                 intent.putExtra(ID_EXTRA_MSG1, getNamaKota);
@@ -110,17 +109,28 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                     public void onResponse(JSONObject response) {
                         try {
 
+                            String namaKotaJSON = null;
                             JSONArray array = response.getJSONArray("data");
 
                             for(int i=0; i<array.length(); i++){
                                 JSONObject data = array.getJSONObject(i);
-                                String namaKotaJSON = data.getString("cityName");
-                                kotaList = new String[]{namaKotaJSON};
+                                namaKotaJSON = data.getString("cityName");
 
-                                for (int j = 0; j < kotaList.length; j++) {
-                                    NamaKota namaKota = new NamaKota(kotaList[j]);
+                                kotaList.add(namaKotaJSON);
+
+                                Log.d("debugggg kotaJSON", String.valueOf(kotaList));
+                                //kotaList[i] = namaKotaJSON;
+                                //Log.d("debugggg kotaJSON", String.valueOf(namaKotaJSON));
+                                //Log.d("debugggg kotaJSON", String.valueOf(kotaList));
+
+                                for (int j = 0; j < kotaList.size(); j++) {
+
+                                    NamaKota namaKota = new NamaKota(kotaList.get(j));
                                     // Binds all strings into an array
+                                    //Log.d("debugggg kotaJSON", namaKota.getNamaKota());
+
                                     arrayList.add(namaKota);
+                                    //Log.d("debugggg kotaJSON", String.valueOf(namaKota));
                                 }
 
                                 /**if(namaKotaJSON.equals(search)){
@@ -129,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                                 }*/
 
                             }
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -150,8 +161,14 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        String text = newText;
-        adapter.filter(text);
-        return false;
+        //String text = newText;
+        //adapter.filter(text);
+        if (TextUtils.isEmpty(newText)) {
+            adapter.filter("");
+            list.clearTextFilter();
+        } else {
+            adapter.filter(newText);
+        }
+        return true;
     }
 }

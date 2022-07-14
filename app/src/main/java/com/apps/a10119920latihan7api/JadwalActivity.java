@@ -96,6 +96,7 @@ public class JadwalActivity extends AppCompatActivity{
 
         getRequest();
         getRequest2();
+        bindExtra();
 
     }
 

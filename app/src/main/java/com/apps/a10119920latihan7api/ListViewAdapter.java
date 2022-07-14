@@ -1,5 +1,6 @@
 package com.apps.a10119920latihan7api;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,14 +23,14 @@ public class ListViewAdapter extends BaseAdapter {
 
     Context mContext;
     LayoutInflater inflater;
-    private List<NamaKota> kotaList = null;
+    private List<NamaKota> kotaList;
     private ArrayList<NamaKota> arrayList;
 
     public ListViewAdapter(Context context, List<NamaKota> kotaList) {
         mContext = context;
         this.kotaList = kotaList;
         inflater = LayoutInflater.from(mContext);
-        this.arrayList = new ArrayList<NamaKota>();
+        this.arrayList = new ArrayList<>();
         this.arrayList.addAll(kotaList);
     }
 
@@ -52,16 +53,16 @@ public class ListViewAdapter extends BaseAdapter {
         return position;
     }
 
+    @SuppressLint("InflateParams")
     public View getView(final int position, View view, ViewGroup parent) {
         final ViewHolder holder;
-        //
+
         if (view == null) {
             holder = new ViewHolder();
             view = inflater.inflate(R.layout.list_style, null);
-            // Locate the TextViews in listview_item.xml
-            holder.name = (TextView) view.findViewById(R.id.Name);
-            view.setTag(holder);
 
+            holder.name = view.findViewById(R.id.Name);
+            view.setTag(holder);
         } else {
             holder = (ViewHolder) view.getTag();
         }
@@ -73,10 +74,10 @@ public class ListViewAdapter extends BaseAdapter {
     // Filter Class
     public void filter(String charText) {
         charText = charText.toLowerCase(Locale.getDefault());
+        //kotaList.clear();
         if (charText.length() == 0) {
             kotaList.addAll(arrayList);
         } else {
-            //kotaList.clear();
             for (NamaKota wp : arrayList) {
                 if (wp.getNamaKota().toLowerCase(Locale.getDefault()).contains(charText)) {
                     kotaList.add(wp);
