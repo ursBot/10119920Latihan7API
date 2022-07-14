@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.*;
@@ -22,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static java.lang.String.format;
 
@@ -34,8 +37,10 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     String[] kotaList;
     ArrayList<NamaKota> arrayList = new ArrayList<NamaKota>();
 
-    private String namaKota;
     private RequestQueue myQueue3;
+    private String getNamaKota, getIdKota;
+
+    public static final String ID_EXTRA_MSG = "com.apps.a10119920latihan7api.MSG";
 
     @RequiresApi(api = Build.VERSION_CODES.N)
 
@@ -64,9 +69,33 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         // Binds the Adapter to the ListView
         list.setAdapter(adapter);
 
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                NamaKota item = adapter.getItem(i);
+
+                //getNamaKota = item.getNamaKota();
+                getNamaKota = list.getItemAtPosition(i).toString();
+
+                for(int j = 0; j < kotaList.length; j++){
+                    if(kotaList[j].equals(getNamaKota)){
+                        getIdKota = String.valueOf(Arrays.asList(kotaList).indexOf(kotaList[j]+1));
+                        Log.d("debugggg", getIdKota);
+                    }
+                }
+
+
+                Intent intent = new Intent(MainActivity.this,JadwalActivity.class);
+                intent.putExtra(ID_EXTRA_MSG, getNamaKota);
+                intent.putExtra(ID_EXTRA_MSG, getIdKota);
+                //based on item add info to intent
+                startActivity(intent);
+            }
+        });
+
     }
 
-    public static String idKota, namaKota;
+    //public static String idKota;
 
     private void getRequestKota(){
 
@@ -91,10 +120,10 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                                     arrayList.add(namaKota);
                                 }
 
-                                if(namaKotaJSON.equals(search)){
+                                /**if(namaKotaJSON.equals(search)){
                                     String idKota = data.getString("cityId");
                                     String namaKota = namaKotaJSON;
-                                }
+                                }*/
 
                             }
                         } catch (JSONException e) {
@@ -121,18 +150,5 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
         String text = newText;
         adapter.filter(text);
         return false;
-    }
-
-    @OnClick(R.id.list)
-    void selanjutnya() {
-        namaKota = list.getText().toString();
-
-        if (isStringEmpty(nameBiodata)) {
-            showWarningMessage();
-        } else {
-            Intent intent = new Intent(this, DoneActivity.class);
-            intent.putExtra(ID_EXTRA_MSG, nameBiodata);
-            startActivity(intent);
-        }
     }
 }

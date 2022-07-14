@@ -49,14 +49,16 @@ KELAS    : IF10
         android:id="@+id/SearchView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:iconifiedByDefault="false"/>
+        android:iconifiedByDefault="false"
+        android:queryHint="Cari Kota"
+        android:background="@color/silver">
+
+        <requestFocus/>
+    </SearchView>
 
     <ListView
         android:id="@+id/ListView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
-    </ListView>
-
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

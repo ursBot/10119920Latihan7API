@@ -56,7 +56,7 @@ public class JadwalActivity extends AppCompatActivity{
         getSupportActionBar().hide(); // hide the title bar
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN); //enable full screen
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_jadwal);
 
         jamSubuh = findViewById(R.id.JamSubuh);
         jamDzuhur = findViewById(R.id.JamDzuhur);
@@ -85,13 +85,6 @@ public class JadwalActivity extends AppCompatActivity{
         myQueue2 = Volley.newRequestQueue(this);
 
         button = findViewById(R.id.ButtonGantiKota);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(JadwalActivity.this, MainActivity.class);
-                startActivity(intent);
-            }
-        });
 
         getRequest();
         getRequest2();
@@ -99,7 +92,6 @@ public class JadwalActivity extends AppCompatActivity{
     }
 
     public static String idKota="14";
-    public static String namaKota="bandung";
 
     private void getRequest(){
         String currentYear = new SimpleDateFormat("yyyy").format(new Date());
@@ -290,5 +282,11 @@ public class JadwalActivity extends AppCompatActivity{
         });
 
         myQueue2.add(request);
+    }
+
+    @OnClick(R.id.ButtonGantiKota)
+    void mulai() {
+        Intent intent = new Intent(JadwalActivity.this, MainActivity.class);
+        startActivity(intent);
     }
 }

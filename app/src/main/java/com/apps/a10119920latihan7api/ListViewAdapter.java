@@ -54,12 +54,14 @@ public class ListViewAdapter extends BaseAdapter {
 
     public View getView(final int position, View view, ViewGroup parent) {
         final ViewHolder holder;
+        //
         if (view == null) {
             holder = new ViewHolder();
             view = inflater.inflate(R.layout.list_style, null);
             // Locate the TextViews in listview_item.xml
             holder.name = (TextView) view.findViewById(R.id.Name);
             view.setTag(holder);
+
         } else {
             holder = (ViewHolder) view.getTag();
         }
@@ -71,9 +73,8 @@ public class ListViewAdapter extends BaseAdapter {
     // Filter Class
     public void filter(String charText) {
         charText = charText.toLowerCase(Locale.getDefault());
-        kotaList.clear();
         if (charText.length() == 0) {
-            kotaList.addAll(arrayList);
+
         } else {
             for (NamaKota wp : arrayList) {
                 if (wp.getNamaKota().toLowerCase(Locale.getDefault()).contains(charText)) {
@@ -83,5 +84,4 @@ public class ListViewAdapter extends BaseAdapter {
         }
         notifyDataSetChanged();
     }
-
 }

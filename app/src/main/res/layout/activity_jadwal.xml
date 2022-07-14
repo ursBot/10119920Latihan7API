@@ -270,7 +270,7 @@ KELAS    : IF10
                     android:orientation="horizontal"
                     android:background="@drawable/background_border_kota">
 
-                    <Button
+                    <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/ButtonGantiKota"
                         style="@style/solatStyle"
                         android:layout_width="200dp"
