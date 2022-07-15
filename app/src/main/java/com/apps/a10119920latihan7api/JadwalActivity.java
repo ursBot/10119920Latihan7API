@@ -4,31 +4,21 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
+import android.graphics.*;
 import android.icu.text.SimpleDateFormat;
-import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+import android.os.*;
+import android.view.*;
 import android.widget.*;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.android.volley.*;
+import com.android.volley.toolbox.*;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.*;
 
-import java.text.ParseException;
+import java.text.*;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 
 import org.joda.time.DateTime;
 import org.joda.time.Period;
@@ -47,7 +37,7 @@ public class JadwalActivity extends AppCompatActivity{
 
     private String kota, id;
 
-    private RequestQueue myQueue, myQueue2;
+    private RequestQueue myQueue2;
 
     Button button;
 
@@ -55,12 +45,24 @@ public class JadwalActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE); //will hide the title
-        getSupportActionBar().hide(); // hide the title bar
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN); //enable full screen
-        setContentView(R.layout.activity_jadwal);
 
+        HideActionBar();
+        InitContent();
+
+        bindExtra();
+        FetchToday();
+        getRequest2();
+    }
+
+    private void HideActionBar() {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        Objects.requireNonNull(getSupportActionBar()).hide();
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.activity_jadwal);
+    }
+
+    private void InitContent() {
         jamSubuh = findViewById(R.id.JamSubuh);
         jamDzuhur = findViewById(R.id.JamDzuhur);
         jamAshar = findViewById(R.id.JamAshar);
@@ -84,7 +86,6 @@ public class JadwalActivity extends AppCompatActivity{
 
         textKota = findViewById(R.id.TextKotaWaktu);
 
-        myQueue = Volley.newRequestQueue(this);
         myQueue2 = Volley.newRequestQueue(this);
 
         button = findViewById(R.id.ButtonGantiKota);
@@ -94,13 +95,10 @@ public class JadwalActivity extends AppCompatActivity{
                 startActivity(new Intent(JadwalActivity.this,MainActivity.class));
             }
         });
-
-        bindExtra();
-        getRequest();
-        getRequest2();
     }
 
-    private void getRequest(){
+    private void FetchToday(){
+        RequestQueue myQueue1 = Volley.newRequestQueue(this);
         String currentYear = new SimpleDateFormat("yyyy").format(new Date());
         String currentMonth = new SimpleDateFormat("MM").format(new Date());
         String currentDay = new SimpleDateFormat("dd").format(new Date());
@@ -224,7 +222,7 @@ public class JadwalActivity extends AppCompatActivity{
             }
         });
 
-        myQueue.add(request);
+        myQueue1.add(request);
     }
 
     private void getRequest2(){
@@ -293,10 +291,9 @@ public class JadwalActivity extends AppCompatActivity{
 
     private void bindExtra(){
         Intent intent = getIntent();
-        kota = intent.getStringExtra(MainActivity.ID_EXTRA_MSG1);
+        kota = intent.getStringExtra(MainActivity.CITY_NAME_KEY);
         textKota.setText(kota);
 
-        id = intent.getStringExtra(MainActivity.ID_EXTRA_MSG2);
+        id = intent.getStringExtra(MainActivity.ID_CITY_KEY);
     }
-
 }

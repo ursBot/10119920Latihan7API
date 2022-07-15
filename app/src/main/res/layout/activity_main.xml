@@ -52,7 +52,6 @@ KELAS    : IF10
         android:iconifiedByDefault="false"
         android:queryHint="Cari Kota"
         android:background="@color/silver">
-
     </SearchView>
 
     <ListView

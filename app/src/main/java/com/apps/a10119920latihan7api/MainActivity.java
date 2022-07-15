@@ -1,168 +1,95 @@
 package com.apps.a10119920latihan7api;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Log;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+import android.view.*;
 import android.widget.*;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.android.volley.*;
+import com.android.volley.toolbox.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import org.json.*;
 
-import static java.lang.String.format;
+import java.util.*;
 
 
 public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
-    ListView list;
-    ListViewAdapter adapter;
-    SearchView search;
-    String[] kotaList;
-    ArrayList<NamaKota> arrayList = new ArrayList<>();
-    ArrayList<String> kotaArrayList = new ArrayList<>();
+    private ListViewAdapter listViewAdapter;
+    private final ArrayList<Kota> kotaList = new ArrayList<>();
 
-    private RequestQueue myQueue3;
-    private String getNamaKota, getIdKota;
-
-    public static final String ID_EXTRA_MSG1 = "getKota";
-    public static final String ID_EXTRA_MSG2 = "getID";
-
-    @RequiresApi(api = Build.VERSION_CODES.N)
+    public static final String ID_CITY_KEY = "ID KOTA";
+    public static final String CITY_NAME_KEY = "KOTA";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE); //will hide the title
-        getSupportActionBar().hide(); // hide the title bar
-        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN); //enable full screen
-        setContentView(R.layout.activity_main);
 
-        list = findViewById(R.id.ListView);
+        HideActionBar();
+        FetchKota();
 
-        // Locate the EditText in listview_main.xml
-        search = findViewById(R.id.SearchView);
-        search.setOnQueryTextListener(this);
-
-        myQueue3 = Volley.newRequestQueue(this);
-
-        getRequestKota();
-
-        // Pass results to ListViewAdapter Class
-        adapter = new ListViewAdapter(this, arrayList);
-
-        // Binds the Adapter to the ListView
-        list.setAdapter(adapter);
-
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                NamaKota item = adapter.getItem(i);
-                getNamaKota = item.getNamaKota();
-
-                getIdKota = String.valueOf(kotaArrayList.indexOf(getNamaKota)+1);
-
-                Intent intent = new Intent(MainActivity.this,JadwalActivity.class);
-                intent.putExtra(ID_EXTRA_MSG1, getNamaKota);
-                intent.putExtra(ID_EXTRA_MSG2, getIdKota);
-                startActivity(intent);
-            }
-        });
-
-    }
-
-    //public static String idKota;
-
-    private void getRequestKota(){
-
-        String url = "https://jadwal-shalat-api.herokuapp.com/cities";
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-
-                            String namaKotaJSON = null;
-                            JSONArray array = response.getJSONArray("data");
-                            //kotaList = new String[array.length()];
-
-                            for(int i=0; i<array.length(); i++){
-                                JSONObject data = array.getJSONObject(i);
-                                namaKotaJSON = data.getString("cityName");
-                                //ring s = namaKotaJSON;
-                                kotaList = new String[]{namaKotaJSON};
-                                kotaArrayList.add(namaKotaJSON);
-                                //kotaList[i]=namaKotaJSON;
-                                /**for(String s: kotaList){
-                                    Log.d("debugggg tes", s);
-                                }*/
-                                //kotaList[i] = namaKotaJSON;
-
-
-
-                                //Log.d("debugggg kotaJSON", String.valueOf(kotaList));
-                                //kotaList[i] = namaKotaJSON;
-                                //Log.d("debugggg kotaJSON", String.valueOf(namaKotaJSON));
-                                //Log.d("debugggg kotaJSON", Arrays.toString(kotaList));
-
-                                for (int j = 0; j < kotaList.length; j++) {
-
-                                    NamaKota namaKota = new NamaKota(kotaList[j]);
-                                    // Binds all strings into an array
-                                    //Log.d("debugggg kotaJSON", namaKota.getNamaKota());
-
-                                    arrayList.add(namaKota);
-                                    //Log.d("debugggg kotaJSON", String.valueOf(namaKota));
-                                }
-                            }
-
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-            }
-        });
-
-        myQueue3.add(request);
+        InitListView();
+        InitSearchView();
     }
 
     @Override
-    public boolean onQueryTextSubmit(String query) {
-        adapter.getFilter().filter(query);
-        adapter.RefreshList();
+    public boolean onQueryTextSubmit(String s) {
+        listViewAdapter.getFilter().filter(s);
+        listViewAdapter.RefreshList();
         return false;
     }
 
     @Override
-    public boolean onQueryTextChange(String query) {
-        adapter.getFilter().filter(query);
-        adapter.RefreshList();
-        return true;
+    public boolean onQueryTextChange(String s) {
+        listViewAdapter.getFilter().filter(s);
+        listViewAdapter.RefreshList();
+        return false;
+    }
+
+    private void HideActionBar() {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        Objects.requireNonNull(getSupportActionBar()).hide();
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.activity_main);
+    }
+
+    private void InitListView() {
+        ListView listView = findViewById(R.id.ListView);
+        listViewAdapter = new ListViewAdapter(this, kotaList);
+        listView.setAdapter(listViewAdapter);
+
+        listView.setOnItemClickListener((adapterView, view, i, l) -> {
+            Kota kota = listViewAdapter.getItem(i);
+            Intent intent = new Intent(MainActivity.this, JadwalActivity.class);
+            intent.putExtra(ID_CITY_KEY, String.valueOf(kota.GetId()));
+            intent.putExtra(CITY_NAME_KEY, kota.GetNama());
+            startActivity(intent);
+        });
+    }
+
+    private void InitSearchView() {
+        SearchView search = findViewById(R.id.SearchView);
+        search.setOnQueryTextListener(this);
+    }
+
+    private void FetchKota() {
+        RequestQueue myQueue3 = Volley.newRequestQueue(this);
+        String url = "https://jadwal-shalat-api.herokuapp.com/cities";
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        JSONArray array = response.getJSONArray("data");
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject objectKota = array.getJSONObject(i);
+                            kotaList.add(new Kota(objectKota.getInt("cityId"), objectKota.getString("cityName")));
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, Throwable::printStackTrace);
+        myQueue3.add(request);
     }
 }
