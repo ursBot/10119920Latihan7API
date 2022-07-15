@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.*;
 import android.icu.text.SimpleDateFormat;
 import android.os.*;
+import android.util.*;
 import android.view.*;
 import android.widget.*;
 
@@ -71,6 +72,89 @@ public class JadwalActivity extends AppCompatActivity{
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_jadwal);
+    }
+
+    private void FetchToday(){
+        RequestQueue myQueue = Volley.newRequestQueue(this);
+        @SuppressLint("SimpleDateFormat") String today = new SimpleDateFormat("dd").format(new Date());
+        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+today+"&cityId="+id;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        JSONObject obj = response.getJSONObject("data");
+                        JSONArray array = obj.getJSONArray("data");
+
+                        JSONObject indSubuh = array.getJSONObject(0);
+                        subuhToday = indSubuh.getString("time");
+                        waktuSubuhToday = sdf.parse(subuhToday);
+                        Log.d("debugggg",""+subuhToday);
+
+                        JSONObject indDzuhur = array.getJSONObject(1);
+                        dzuhurToday = indDzuhur.getString("time");
+                        waktuDzuhurToday = sdf.parse(dzuhurToday);
+
+                        JSONObject indAshar = array.getJSONObject(2);
+                        asharToday = indAshar.getString("time");
+                        waktuAsharToday = sdf.parse(asharToday);
+
+                        JSONObject indMaghrib = array.getJSONObject(3);
+                        maghribToday = indMaghrib.getString("time");
+                        waktuMaghribToday = sdf.parse(maghribToday);
+
+                        JSONObject indIsya = array.getJSONObject(4);
+                        isyaToday = indIsya.getString("time");
+                        waktuIsyaToday = sdf.parse(isyaToday);
+                    } catch (JSONException | ParseException e) {
+                        e.printStackTrace();
+                    }
+                }, Throwable::printStackTrace);
+        myQueue.add(request);
+    }
+
+    private void FetchTomorrow(){
+        RequestQueue myQueue = Volley.newRequestQueue(this);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+        Date tomorrow = calendar.getTime();
+
+        @SuppressLint("SimpleDateFormat") String today = new SimpleDateFormat("dd").format(tomorrow);
+        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+today+"&cityId="+id;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        JSONObject obj = response.getJSONObject("data");
+                        JSONArray array = obj.getJSONArray("data");
+
+                        JSONObject indSubuh = array.getJSONObject(0);
+                        subuhTomorrow = indSubuh.getString("time");
+
+                        JSONObject indDzuhur = array.getJSONObject(1);
+                        dzuhurTomorrow = indDzuhur.getString("time");
+
+                        JSONObject indAshar = array.getJSONObject(2);
+                        asharTomorrow = indAshar.getString("time");
+
+                        JSONObject indMaghrib = array.getJSONObject(3);
+                        maghribTomorrow = indMaghrib.getString("time");
+
+                        JSONObject indIsya = array.getJSONObject(4);
+                        isyaTomorrow = indIsya.getString("time");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }, Throwable::printStackTrace);
+        myQueue.add(request);
+    }
+
+    private void BindExtra(){
+        TextView textKota = findViewById(R.id.TextKotaWaktu);
+        Intent intent = getIntent();
+        String kota = intent.getStringExtra(MainActivity.CITY_NAME_KEY);
+        textKota.setText(kota);
+
+        id = intent.getStringExtra(MainActivity.ID_CITY_KEY);
     }
 
     @SuppressLint("SetTextI18n")
@@ -216,85 +300,4 @@ public class JadwalActivity extends AppCompatActivity{
         button.setOnClickListener(view -> startActivity(new Intent(JadwalActivity.this,MainActivity.class)));
     }
 
-    private void FetchToday(){
-        RequestQueue myQueue = Volley.newRequestQueue(this);
-        @SuppressLint("SimpleDateFormat") String today = new SimpleDateFormat("dd").format(new Date());
-        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+today+"&cityId="+id;
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                response -> {
-                    try {
-                        JSONObject obj = response.getJSONObject("data");
-                        JSONArray array = obj.getJSONArray("data");
-
-                        JSONObject indSubuh = array.getJSONObject(0);
-                        subuhToday = indSubuh.getString("time");
-                        waktuSubuhToday = sdf.parse(subuhToday);
-
-                        JSONObject indDzuhur = array.getJSONObject(1);
-                        dzuhurToday = indDzuhur.getString("time");
-                        waktuDzuhurToday = sdf.parse(dzuhurToday);
-
-                        JSONObject indAshar = array.getJSONObject(2);
-                        asharToday = indAshar.getString("time");
-                        waktuAsharToday = sdf.parse(asharToday);
-
-                        JSONObject indMaghrib = array.getJSONObject(3);
-                        maghribToday = indMaghrib.getString("time");
-                        waktuMaghribToday = sdf.parse(maghribToday);
-
-                        JSONObject indIsya = array.getJSONObject(4);
-                        isyaToday = indIsya.getString("time");
-                        waktuIsyaToday = sdf.parse(isyaToday);
-                    } catch (JSONException | ParseException e) {
-                        e.printStackTrace();
-                    }
-                }, Throwable::printStackTrace);
-        myQueue.add(request);
-    }
-
-    private void FetchTomorrow(){
-        RequestQueue myQueue = Volley.newRequestQueue(this);
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, 1);
-        Date tomorrow = calendar.getTime();
-
-        @SuppressLint("SimpleDateFormat") String today = new SimpleDateFormat("dd").format(tomorrow);
-        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+today+"&cityId="+id;
-
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                response -> {
-                    try {
-                        JSONObject obj = response.getJSONObject("data");
-                        JSONArray array = obj.getJSONArray("data");
-
-                        JSONObject indSubuh = array.getJSONObject(0);
-                        subuhTomorrow = indSubuh.getString("time");
-
-                        JSONObject indDzuhur = array.getJSONObject(1);
-                        dzuhurTomorrow = indDzuhur.getString("time");
-
-                        JSONObject indAshar = array.getJSONObject(2);
-                        asharTomorrow = indAshar.getString("time");
-
-                        JSONObject indMaghrib = array.getJSONObject(3);
-                        maghribTomorrow = indMaghrib.getString("time");
-
-                        JSONObject indIsya = array.getJSONObject(4);
-                        isyaTomorrow = indIsya.getString("time");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }, Throwable::printStackTrace);
-        myQueue.add(request);
-    }
-
-    private void BindExtra(){
-        TextView textKota = findViewById(R.id.TextKotaWaktu);
-        Intent intent = getIntent();
-        String kota = intent.getStringExtra(MainActivity.CITY_NAME_KEY);
-        textKota.setText(kota);
-
-        id = intent.getStringExtra(MainActivity.ID_CITY_KEY);
-    }
 }

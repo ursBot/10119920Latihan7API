@@ -2,6 +2,7 @@ package com.apps.a10119920latihan7api;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.*;
 import android.widget.*;
 
@@ -76,8 +77,9 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     }
 
     private void FetchKota() {
-        RequestQueue myQueue3 = Volley.newRequestQueue(this);
+        RequestQueue myQueue = Volley.newRequestQueue(this);
         String url = "https://jadwal-shalat-api.herokuapp.com/cities";
+
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
                     try {
@@ -90,6 +92,6 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
                         e.printStackTrace();
                     }
                 }, Throwable::printStackTrace);
-        myQueue3.add(request);
+        myQueue.add(request);
     }
 }
