@@ -59,11 +59,6 @@ public class JadwalActivity extends AppCompatActivity{
         FetchToday();
         FetchTomorrow();
 
-        try {
-            InitContent();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
     }
 
     private void HideActionBar() {
@@ -75,7 +70,7 @@ public class JadwalActivity extends AppCompatActivity{
     }
 
     private void FetchToday(){
-        RequestQueue myQueue = Volley.newRequestQueue(this);
+        RequestQueue myQueue1 = Volley.newRequestQueue(this);
         @SuppressLint("SimpleDateFormat") String today = new SimpleDateFormat("dd").format(new Date());
         String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+today+"&cityId="+id;
 
@@ -88,7 +83,6 @@ public class JadwalActivity extends AppCompatActivity{
                         JSONObject indSubuh = array.getJSONObject(0);
                         subuhToday = indSubuh.getString("time");
                         waktuSubuhToday = sdf.parse(subuhToday);
-                        Log.d("debugggg",""+subuhToday);
 
                         JSONObject indDzuhur = array.getJSONObject(1);
                         dzuhurToday = indDzuhur.getString("time");
@@ -105,15 +99,16 @@ public class JadwalActivity extends AppCompatActivity{
                         JSONObject indIsya = array.getJSONObject(4);
                         isyaToday = indIsya.getString("time");
                         waktuIsyaToday = sdf.parse(isyaToday);
+                        InitContent();
                     } catch (JSONException | ParseException e) {
                         e.printStackTrace();
                     }
                 }, Throwable::printStackTrace);
-        myQueue.add(request);
+        myQueue1.add(request);
     }
 
     private void FetchTomorrow(){
-        RequestQueue myQueue = Volley.newRequestQueue(this);
+        RequestQueue myQueue2 = Volley.newRequestQueue(this);
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         Date tomorrow = calendar.getTime();
@@ -141,11 +136,12 @@ public class JadwalActivity extends AppCompatActivity{
 
                         JSONObject indIsya = array.getJSONObject(4);
                         isyaTomorrow = indIsya.getString("time");
-                    } catch (JSONException e) {
+                        InitContent();
+                    } catch (JSONException | ParseException e) {
                         e.printStackTrace();
                     }
                 }, Throwable::printStackTrace);
-        myQueue.add(request);
+        myQueue2.add(request);
     }
 
     private void BindExtra(){
