@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.graphics.*;
 import android.icu.text.SimpleDateFormat;
 import android.os.*;
-import android.util.*;
 import android.view.*;
 import android.widget.*;
 
@@ -35,7 +34,6 @@ public class JadwalActivity extends AppCompatActivity{
     private Date waktuSubuhToday, waktuDzuhurToday, waktuAsharToday, waktuMaghribToday, waktuIsyaToday;
 
     private String subuhTomorrow, dzuhurTomorrow, asharTomorrow, maghribTomorrow, isyaTomorrow;
-    //private Date waktuSubuhTomorrow, waktuDzuhurTomorrow, waktuAsharTomorrow, waktuMaghribTomorrow, waktuIsyaTomorrow;
 
     @SuppressLint("SimpleDateFormat")
     private final String currentYear = new SimpleDateFormat("yyyy").format(new Date());
@@ -56,9 +54,11 @@ public class JadwalActivity extends AppCompatActivity{
         HideActionBar();
 
         BindExtra();
-        FetchToday();
-        FetchTomorrow();
-
+        try {
+            FetchToday();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     private void HideActionBar() {
@@ -69,14 +69,17 @@ public class JadwalActivity extends AppCompatActivity{
         setContentView(R.layout.activity_jadwal);
     }
 
-    private void FetchToday(){
+    private void FetchToday() throws ParseException {
         RequestQueue myQueue1 = Volley.newRequestQueue(this);
+        RequestQueue myQueue2 = Volley.newRequestQueue(this);
         @SuppressLint("SimpleDateFormat") String today = new SimpleDateFormat("dd").format(new Date());
         String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+today+"&cityId="+id;
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                response -> {
-                    try {
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
                         JSONObject obj = response.getJSONObject("data");
                         JSONArray array = obj.getJSONArray("data");
 
@@ -103,21 +106,25 @@ public class JadwalActivity extends AppCompatActivity{
                     } catch (JSONException | ParseException e) {
                         e.printStackTrace();
                     }
-                }, Throwable::printStackTrace);
-        myQueue1.add(request);
-    }
+                }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        });
 
-    private void FetchTomorrow(){
-        RequestQueue myQueue2 = Volley.newRequestQueue(this);
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         Date tomorrow = calendar.getTime();
 
-        @SuppressLint("SimpleDateFormat") String today = new SimpleDateFormat("dd").format(tomorrow);
-        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+today+"&cityId="+id;
+        @SuppressLint("SimpleDateFormat") String tomorroww = new SimpleDateFormat("dd").format(tomorrow);
+        String url1 = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+tomorroww+"&cityId="+id;
 
-        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                response -> {
+        JsonObjectRequest request1 = new JsonObjectRequest(Request.Method.GET, url1, null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
                     try {
                         JSONObject obj = response.getJSONObject("data");
                         JSONArray array = obj.getJSONArray("data");
@@ -140,8 +147,16 @@ public class JadwalActivity extends AppCompatActivity{
                     } catch (JSONException | ParseException e) {
                         e.printStackTrace();
                     }
-                }, Throwable::printStackTrace);
-        myQueue2.add(request);
+                }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+            }
+        });
+
+        myQueue1.add(request);
+        myQueue2.add(request1);
     }
 
     private void BindExtra(){
@@ -157,6 +172,7 @@ public class JadwalActivity extends AppCompatActivity{
     private void InitContent() throws ParseException {
         @SuppressLint("SimpleDateFormat") String jamSekarang = new SimpleDateFormat("HH:mm").format(new Date());
         @SuppressLint("SimpleDateFormat") String tanggalFormat = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
         Date jamSekarangFormat = sdf.parse(jamSekarang);
 
         TextView textSolat = findViewById(R.id.TextSolat);
@@ -188,7 +204,7 @@ public class JadwalActivity extends AppCompatActivity{
         TextView jamDzuhur = findViewById(R.id.JamDzuhur);
         TextView textDzuhur = findViewById(R.id.TextDzuhur);
 
-        if(jamSekarangFormat.before(waktuDzuhurToday) && jamSekarangFormat.after(waktuSubuhToday)) {
+        if(jamSekarangFormat.before(waktuDzuhurToday)) {
             jamDzuhur.setText(dzuhurToday);
             jamDzuhur.setTextColor(Color.parseColor("#FF018786"));
             jamDzuhur.setTypeface(null, Typeface.BOLD);
@@ -197,12 +213,6 @@ public class JadwalActivity extends AppCompatActivity{
 
             textSolat.setText("Dzuhur");
             textJam.setText(dzuhurToday);
-            DateTime targetDateTime = DateTime.parse(format("%s %s", tanggalFormat, dzuhurToday), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
-            DateTime now = DateTime.now();
-            Period period = new Period(now, targetDateTime);
-            int jam = period.getHours();
-            int menit = period.getMinutes();
-            jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
         }else{
             jamDzuhur.setText(dzuhurTomorrow);
         }
@@ -210,7 +220,7 @@ public class JadwalActivity extends AppCompatActivity{
         TextView jamAshar = findViewById(R.id.JamAshar);
         TextView textAshar = findViewById(R.id.TextAshar);
 
-        if(jamSekarangFormat.before(waktuAsharToday) && jamSekarangFormat.after(waktuDzuhurToday)) {
+        if(jamSekarangFormat.before(waktuAsharToday)) {
             jamAshar.setText(asharToday);
             jamAshar.setTextColor(Color.parseColor("#FF018786"));
             jamAshar.setTypeface(null, Typeface.BOLD);
@@ -219,12 +229,6 @@ public class JadwalActivity extends AppCompatActivity{
 
             textSolat.setText("Ashar");
             textJam.setText(asharToday);
-            DateTime targetDateTime = DateTime.parse(format("%s %s", tanggalFormat, asharToday), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
-            DateTime now = DateTime.now();
-            Period period = new Period(now, targetDateTime);
-            int jam = period.getHours();
-            int menit = period.getMinutes();
-            jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
         }else{
             jamAshar.setText(asharTomorrow);
         }
@@ -232,7 +236,7 @@ public class JadwalActivity extends AppCompatActivity{
         TextView jamMaghrib = findViewById(R.id.JamMaghrib);
         TextView textMaghrib = findViewById(R.id.TextMaghrib);
 
-        if(jamSekarangFormat.before(waktuMaghribToday) && jamSekarangFormat.after(waktuAsharToday)) {
+        if(jamSekarangFormat.before(waktuMaghribToday)) {
             jamMaghrib.setText(maghribToday);
             jamMaghrib.setTextColor(Color.parseColor("#FF018786"));
             jamMaghrib.setTypeface(null, Typeface.BOLD);
@@ -241,12 +245,6 @@ public class JadwalActivity extends AppCompatActivity{
 
             textSolat.setText("Maghrib");
             textJam.setText(maghribToday);
-            DateTime targetDateTime = DateTime.parse(format("%s %s", tanggalFormat, maghribToday), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
-            DateTime now = DateTime.now();
-            Period period = new Period(now, targetDateTime);
-            int jam = period.getHours();
-            int menit = period.getMinutes();
-            jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
         }else{
             jamMaghrib.setText(maghribTomorrow);
         }
@@ -254,7 +252,7 @@ public class JadwalActivity extends AppCompatActivity{
         TextView jamIsya = findViewById(R.id.JamIsya);
         TextView textIsya = findViewById(R.id.TextIsya);
 
-        if(jamSekarangFormat.before(waktuIsyaToday) && jamSekarangFormat.after(waktuMaghribToday)) {
+        if(jamSekarangFormat.before(waktuIsyaToday)) {
             jamIsya.setText(isyaToday);
             jamIsya.setTextColor(Color.parseColor("#FF018786"));
             jamIsya.setTypeface(null, Typeface.BOLD);
@@ -263,12 +261,6 @@ public class JadwalActivity extends AppCompatActivity{
 
             textSolat.setText("Isya");
             textJam.setText(isyaToday);
-            DateTime targetDateTime = DateTime.parse(format("%s %s", tanggalFormat, isyaToday), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
-            DateTime now = DateTime.now();
-            Period period = new Period(now, targetDateTime);
-            int jam = period.getHours();
-            int menit = period.getMinutes();
-            jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
         }else if(jamSekarangFormat.after(waktuIsyaToday)){
             jamIsya.setText(isyaTomorrow);
 
@@ -280,12 +272,6 @@ public class JadwalActivity extends AppCompatActivity{
 
             textSolat.setText("Subuh");
             textJam.setText(subuhTomorrow);
-            DateTime targetDateTime = DateTime.parse(format("%s %s", tanggalFormat, subuhTomorrow), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
-            DateTime now = DateTime.now();
-            Period period = new Period(now, targetDateTime);
-            int jam = period.getHours();
-            int menit = period.getMinutes();
-            jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
         }
 
         @SuppressLint("SimpleDateFormat") String tanggal = new SimpleDateFormat("EEEE, dd MMMM yyyy").format(new Date());
@@ -295,5 +281,4 @@ public class JadwalActivity extends AppCompatActivity{
         button = findViewById(R.id.ButtonGantiKota);
         button.setOnClickListener(view -> startActivity(new Intent(JadwalActivity.this,MainActivity.class)));
     }
-
 }
