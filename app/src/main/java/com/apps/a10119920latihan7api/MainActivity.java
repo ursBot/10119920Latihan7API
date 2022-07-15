@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity implements SearchView.OnQuer
     private ListViewAdapter listViewAdapter;
     private final ArrayList<Kota> kotaList = new ArrayList<>();
 
-    public static final String ID_CITY_KEY = "ID KOTA";
+    public static final String ID_CITY_KEY = "ID";
     public static final String CITY_NAME_KEY = "KOTA";
 
     @Override

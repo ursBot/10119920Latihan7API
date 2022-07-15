@@ -3,6 +3,7 @@ package com.apps.a10119920latihan7api;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.*;
 import android.icu.text.SimpleDateFormat;
@@ -29,15 +30,20 @@ import static java.lang.String.format;
 
 public class JadwalActivity extends AppCompatActivity{
 
+    private String subuhToday, dzuhurToday, asharToday, maghribToday, isyaToday;
+    private Date waktuSubuhToday, waktuDzuhurToday, waktuAsharToday, waktuMaghribToday, waktuIsyaToday;
 
-    private TextView jamSubuh, jamDzuhur, jamAshar, jamMaghrib, jamIsya;
-    private TextView textSubuh, textDzuhur, textAshar, textMaghrib, textIsya;
-    private TextView textSolat, textJam, jamKecil;
-    private TextView hariIni, textKota;
+    private String subuhTomorrow, dzuhurTomorrow, asharTomorrow, maghribTomorrow, isyaTomorrow;
+    //private Date waktuSubuhTomorrow, waktuDzuhurTomorrow, waktuAsharTomorrow, waktuMaghribTomorrow, waktuIsyaTomorrow;
 
-    private String kota, id;
+    @SuppressLint("SimpleDateFormat")
+    private final String currentYear = new SimpleDateFormat("yyyy").format(new Date());
+    @SuppressLint("SimpleDateFormat")
+    private final String currentMonth = new SimpleDateFormat("MM").format(new Date());
+    @SuppressLint("SimpleDateFormat")
+    private final SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 
-    private RequestQueue myQueue2;
+    private String id;
 
     Button button;
 
@@ -47,11 +53,16 @@ public class JadwalActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
 
         HideActionBar();
-        InitContent();
 
-        bindExtra();
+        BindExtra();
         FetchToday();
-        getRequest2();
+        FetchTomorrow();
+
+        try {
+            InitContent();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     private void HideActionBar() {
@@ -62,236 +73,226 @@ public class JadwalActivity extends AppCompatActivity{
         setContentView(R.layout.activity_jadwal);
     }
 
-    private void InitContent() {
-        jamSubuh = findViewById(R.id.JamSubuh);
-        jamDzuhur = findViewById(R.id.JamDzuhur);
-        jamAshar = findViewById(R.id.JamAshar);
-        jamMaghrib = findViewById(R.id.JamMaghrib);
-        jamIsya = findViewById(R.id.JamIsya);
+    @SuppressLint("SetTextI18n")
+    private void InitContent() throws ParseException {
+        @SuppressLint("SimpleDateFormat") String jamSekarang = new SimpleDateFormat("HH:mm").format(new Date());
+        @SuppressLint("SimpleDateFormat") String tanggalFormat = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        Date jamSekarangFormat = sdf.parse(jamSekarang);
 
-        textSubuh = findViewById(R.id.TextSubuh);
-        textDzuhur = findViewById(R.id.TextDzuhur);
-        textAshar = findViewById(R.id.TextAshar);
-        textMaghrib = findViewById(R.id.TextMaghrib);
-        textIsya = findViewById(R.id.TextIsya);
+        TextView textSolat = findViewById(R.id.TextSolat);
+        TextView textJam = findViewById(R.id.TextJam);
+        TextView jamKecil = findViewById(R.id.JamKecil);
 
-        textSolat = findViewById(R.id.TextSolat);
-        textJam = findViewById(R.id.TextJam);
-        jamKecil = findViewById(R.id.JamKecil);
+        TextView jamSubuh = findViewById(R.id.JamSubuh);
+        TextView textSubuh = findViewById(R.id.TextSubuh);
 
-        hariIni = findViewById(R.id.TextHariDetail);
-        //SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd G 'at' HH:mm:ss z"); output 2022.07.11 M at 15:27:33 WIB
-        String currentDateandTime = new SimpleDateFormat("EEEE, dd MMMM yyyy").format(new Date());
-        hariIni.setText(currentDateandTime);
+        if(jamSekarangFormat.before(waktuSubuhToday)) {
+            jamSubuh.setText(subuhToday);
+            jamSubuh.setTextColor(Color.parseColor("#FF018786"));
+            jamSubuh.setTypeface(null, Typeface.BOLD);
+            textSubuh.setTextColor(Color.parseColor("#FF018786"));
+            textSubuh.setTypeface(null, Typeface.BOLD);
 
-        textKota = findViewById(R.id.TextKotaWaktu);
+            textSolat.setText("Subuh");
+            textJam.setText(subuhToday);
+            DateTime targetDateTime = DateTime.parse(format("%s %s", tanggalFormat, subuhToday), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
+            DateTime now = DateTime.now();
+            Period period = new Period(now, targetDateTime);
+            int jam = period.getHours();
+            int menit = period.getMinutes();
+            jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
+        }else{
+            jamSubuh.setText(subuhTomorrow);
+        }
 
-        myQueue2 = Volley.newRequestQueue(this);
+        TextView jamDzuhur = findViewById(R.id.JamDzuhur);
+        TextView textDzuhur = findViewById(R.id.TextDzuhur);
+
+        if(jamSekarangFormat.before(waktuDzuhurToday) && jamSekarangFormat.after(waktuSubuhToday)) {
+            jamDzuhur.setText(dzuhurToday);
+            jamDzuhur.setTextColor(Color.parseColor("#FF018786"));
+            jamDzuhur.setTypeface(null, Typeface.BOLD);
+            textDzuhur.setTextColor(Color.parseColor("#FF018786"));
+            textDzuhur.setTypeface(null, Typeface.BOLD);
+
+            textSolat.setText("Dzuhur");
+            textJam.setText(dzuhurToday);
+            DateTime targetDateTime = DateTime.parse(format("%s %s", tanggalFormat, dzuhurToday), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
+            DateTime now = DateTime.now();
+            Period period = new Period(now, targetDateTime);
+            int jam = period.getHours();
+            int menit = period.getMinutes();
+            jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
+        }else{
+            jamDzuhur.setText(dzuhurTomorrow);
+        }
+
+        TextView jamAshar = findViewById(R.id.JamAshar);
+        TextView textAshar = findViewById(R.id.TextAshar);
+
+        if(jamSekarangFormat.before(waktuAsharToday) && jamSekarangFormat.after(waktuDzuhurToday)) {
+            jamAshar.setText(asharToday);
+            jamAshar.setTextColor(Color.parseColor("#FF018786"));
+            jamAshar.setTypeface(null, Typeface.BOLD);
+            textAshar.setTextColor(Color.parseColor("#FF018786"));
+            textAshar.setTypeface(null, Typeface.BOLD);
+
+            textSolat.setText("Ashar");
+            textJam.setText(asharToday);
+            DateTime targetDateTime = DateTime.parse(format("%s %s", tanggalFormat, asharToday), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
+            DateTime now = DateTime.now();
+            Period period = new Period(now, targetDateTime);
+            int jam = period.getHours();
+            int menit = period.getMinutes();
+            jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
+        }else{
+            jamAshar.setText(asharTomorrow);
+        }
+
+        TextView jamMaghrib = findViewById(R.id.JamMaghrib);
+        TextView textMaghrib = findViewById(R.id.TextMaghrib);
+
+        if(jamSekarangFormat.before(waktuMaghribToday) && jamSekarangFormat.after(waktuAsharToday)) {
+            jamMaghrib.setText(maghribToday);
+            jamMaghrib.setTextColor(Color.parseColor("#FF018786"));
+            jamMaghrib.setTypeface(null, Typeface.BOLD);
+            textMaghrib.setTextColor(Color.parseColor("#FF018786"));
+            textMaghrib.setTypeface(null, Typeface.BOLD);
+
+            textSolat.setText("Maghrib");
+            textJam.setText(maghribToday);
+            DateTime targetDateTime = DateTime.parse(format("%s %s", tanggalFormat, maghribToday), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
+            DateTime now = DateTime.now();
+            Period period = new Period(now, targetDateTime);
+            int jam = period.getHours();
+            int menit = period.getMinutes();
+            jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
+        }else{
+            jamMaghrib.setText(maghribTomorrow);
+        }
+
+        TextView jamIsya = findViewById(R.id.JamIsya);
+        TextView textIsya = findViewById(R.id.TextIsya);
+
+        if(jamSekarangFormat.before(waktuIsyaToday) && jamSekarangFormat.after(waktuMaghribToday)) {
+            jamIsya.setText(isyaToday);
+            jamIsya.setTextColor(Color.parseColor("#FF018786"));
+            jamIsya.setTypeface(null, Typeface.BOLD);
+            textIsya.setTextColor(Color.parseColor("#FF018786"));
+            textIsya.setTypeface(null, Typeface.BOLD);
+
+            textSolat.setText("Isya");
+            textJam.setText(isyaToday);
+            DateTime targetDateTime = DateTime.parse(format("%s %s", tanggalFormat, isyaToday), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
+            DateTime now = DateTime.now();
+            Period period = new Period(now, targetDateTime);
+            int jam = period.getHours();
+            int menit = period.getMinutes();
+            jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
+        }else if(jamSekarangFormat.after(waktuIsyaToday)){
+            jamIsya.setText(isyaTomorrow);
+
+            jamSubuh.setText(subuhTomorrow);
+            jamSubuh.setTextColor(Color.parseColor("#FF018786"));
+            jamSubuh.setTypeface(null, Typeface.BOLD);
+            textSubuh.setTextColor(Color.parseColor("#FF018786"));
+            textSubuh.setTypeface(null, Typeface.BOLD);
+
+            textSolat.setText("Subuh");
+            textJam.setText(subuhTomorrow);
+            DateTime targetDateTime = DateTime.parse(format("%s %s", tanggalFormat, subuhTomorrow), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
+            DateTime now = DateTime.now();
+            Period period = new Period(now, targetDateTime);
+            int jam = period.getHours();
+            int menit = period.getMinutes();
+            jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
+        }
+
+        @SuppressLint("SimpleDateFormat") String tanggal = new SimpleDateFormat("EEEE, dd MMMM yyyy").format(new Date());
+        TextView hariIni = findViewById(R.id.TextHariDetail);
+        hariIni.setText(tanggal);
 
         button = findViewById(R.id.ButtonGantiKota);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(JadwalActivity.this,MainActivity.class));
-            }
-        });
+        button.setOnClickListener(view -> startActivity(new Intent(JadwalActivity.this,MainActivity.class)));
     }
 
     private void FetchToday(){
-        RequestQueue myQueue1 = Volley.newRequestQueue(this);
-        String currentYear = new SimpleDateFormat("yyyy").format(new Date());
-        String currentMonth = new SimpleDateFormat("MM").format(new Date());
-        String currentDay = new SimpleDateFormat("dd").format(new Date());
-        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+currentDay+"&cityId="+id;
-        String pattern = "HH:mm";
-        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-        String currentDateandTime = sdf.format(new Date());
-        String current = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        RequestQueue myQueue = Volley.newRequestQueue(this);
+        @SuppressLint("SimpleDateFormat") String today = new SimpleDateFormat("dd").format(new Date());
+        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+today+"&cityId="+id;
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            JSONObject obj = response.getJSONObject("data");
-                            JSONArray array = obj.getJSONArray("data");
+                response -> {
+                    try {
+                        JSONObject obj = response.getJSONObject("data");
+                        JSONArray array = obj.getJSONArray("data");
 
-                            JSONObject indSubuh = array.getJSONObject(0);
-                            String dataJamSubuh = indSubuh.getString("time");
-                            jamSubuh.setText(dataJamSubuh);
-                            Date waktuSubuh = sdf.parse(dataJamSubuh);
+                        JSONObject indSubuh = array.getJSONObject(0);
+                        subuhToday = indSubuh.getString("time");
+                        waktuSubuhToday = sdf.parse(subuhToday);
 
-                            JSONObject indDzuhur = array.getJSONObject(1);
-                            String dataJamDzuhur = indDzuhur.getString("time");
-                            jamDzuhur.setText(dataJamDzuhur);
-                            Date waktuDzuhur = sdf.parse(dataJamDzuhur);
+                        JSONObject indDzuhur = array.getJSONObject(1);
+                        dzuhurToday = indDzuhur.getString("time");
+                        waktuDzuhurToday = sdf.parse(dzuhurToday);
 
-                            JSONObject indAshar = array.getJSONObject(2);
-                            String dataJamAshar = indAshar.getString("time");
-                            jamAshar.setText(dataJamAshar);
-                            Date waktuAshar = sdf.parse(dataJamAshar);
+                        JSONObject indAshar = array.getJSONObject(2);
+                        asharToday = indAshar.getString("time");
+                        waktuAsharToday = sdf.parse(asharToday);
 
-                            JSONObject indMaghrib = array.getJSONObject(3);
-                            String dataJamMaghrib = indMaghrib.getString("time");
-                            jamMaghrib.setText(dataJamMaghrib);
-                            Date waktuMaghrib = sdf.parse(dataJamMaghrib);
+                        JSONObject indMaghrib = array.getJSONObject(3);
+                        maghribToday = indMaghrib.getString("time");
+                        waktuMaghribToday = sdf.parse(maghribToday);
 
-                            JSONObject indIsya = array.getJSONObject(4);
-                            String dataJamIsya = indIsya.getString("time");
-                            jamIsya.setText(dataJamIsya);
-                            Date waktuIsya = sdf.parse(dataJamIsya);
-
-                            Date currentHoursandMinute = sdf.parse(currentDateandTime);
-                            if(currentHoursandMinute.before(waktuSubuh)) {
-                                textSubuh.setTextColor(Color.parseColor("#FF018786"));
-                                textSubuh.setTypeface(null, Typeface.BOLD);
-                                jamSubuh.setTextColor(Color.parseColor("#FF018786"));
-                                jamSubuh.setTypeface(null, Typeface.BOLD);
-                                textSolat.setText("Subuh");
-                                textJam.setText(dataJamSubuh);
-                                DateTime targetDateTime = DateTime.parse(format("%s %s", current, dataJamSubuh), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
-                                DateTime now = DateTime.now();
-                                Period period = new Period(now, targetDateTime);
-                                int jam = period.getHours();
-                                int menit = period.getMinutes();
-                                jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
-                            } else if (currentHoursandMinute.before(waktuDzuhur)){
-                                textDzuhur.setTextColor(Color.parseColor("#FF018786"));
-                                textDzuhur.setTypeface(null, Typeface.BOLD);
-                                jamDzuhur.setTextColor(Color.parseColor("#FF018786"));
-                                jamDzuhur.setTypeface(null, Typeface.BOLD);
-                                textSolat.setText("Dzuhur");
-                                textJam.setText(dataJamDzuhur);
-                                DateTime targetDateTime = DateTime.parse(format("%s %s", current, dataJamDzuhur), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
-                                DateTime now = DateTime.now();
-                                Period period = new Period(now, targetDateTime);
-                                int jam = period.getHours();
-                                int menit = period.getMinutes();
-                                jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
-                            } else if (currentHoursandMinute.before(waktuAshar)){
-                                textAshar.setTextColor(Color.parseColor("#FF018786"));
-                                textAshar.setTypeface(null, Typeface.BOLD);
-                                jamAshar.setTextColor(Color.parseColor("#FF018786"));
-                                jamAshar.setTypeface(null, Typeface.BOLD);
-                                textSolat.setText("Ashar");
-                                textJam.setText(dataJamAshar);
-                                DateTime targetDateTime = DateTime.parse(format("%s %s", current, dataJamAshar), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
-                                DateTime now = DateTime.now();
-                                Period period = new Period(now, targetDateTime);
-                                int jam = period.getHours();
-                                int menit = period.getMinutes();
-                                jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
-                            } else if (currentHoursandMinute.before(waktuMaghrib)){
-                                textMaghrib.setTextColor(Color.parseColor("#FF018786"));
-                                textMaghrib.setTypeface(null, Typeface.BOLD);
-                                jamMaghrib.setTextColor(Color.parseColor("#FF018786"));
-                                jamMaghrib.setTypeface(null, Typeface.BOLD);
-                                textSolat.setText("Maghrib");
-                                textJam.setText(dataJamMaghrib);
-                                DateTime targetDateTime = DateTime.parse(format("%s %s", current, dataJamMaghrib), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
-                                DateTime now = DateTime.now();
-                                Period period = new Period(now, targetDateTime);
-                                int jam = period.getHours();
-                                int menit = period.getMinutes();
-                                jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
-                            } else if (currentHoursandMinute.before(waktuIsya)){
-                                textIsya.setTextColor(Color.parseColor("#FF018786"));
-                                textIsya.setTypeface(null, Typeface.BOLD);
-                                jamIsya.setTextColor(Color.parseColor("#FF018786"));
-                                jamIsya.setTypeface(null, Typeface.BOLD);
-                                textSolat.setText("Isya");
-                                textJam.setText(dataJamIsya);
-                                DateTime targetDateTime = DateTime.parse(format("%s %s", current, dataJamIsya), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
-                                DateTime now = DateTime.parse(format("%s", currentDateandTime), DateTimeFormat.forPattern("HH:mm"));
-                                Period period = new Period(now, targetDateTime);
-                                int jam = period.getHours();
-                                int menit = period.getMinutes();
-                                jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
-                            } else {
-
-                            }
-
-                        } catch (JSONException | ParseException e) {
-                            e.printStackTrace();
-                        }
+                        JSONObject indIsya = array.getJSONObject(4);
+                        isyaToday = indIsya.getString("time");
+                        waktuIsyaToday = sdf.parse(isyaToday);
+                    } catch (JSONException | ParseException e) {
+                        e.printStackTrace();
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-            }
-        });
-
-        myQueue1.add(request);
+                }, Throwable::printStackTrace);
+        myQueue.add(request);
     }
 
-    private void getRequest2(){
+    private void FetchTomorrow(){
+        RequestQueue myQueue = Volley.newRequestQueue(this);
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         Date tomorrow = calendar.getTime();
 
-        String currentYear = new SimpleDateFormat("yyyy").format(tomorrow);
-        String currentMonth = new SimpleDateFormat("MM").format(tomorrow);
-        String currentDay = new SimpleDateFormat("dd").format(tomorrow);
-        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+currentDay+"&cityId="+id;
-        String pattern = "HH:mm";
-        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-        String currentDateandTime = sdf.format(tomorrow);
-        String current = new SimpleDateFormat("yyyy-MM-dd").format(tomorrow);
+        @SuppressLint("SimpleDateFormat") String today = new SimpleDateFormat("dd").format(tomorrow);
+        String url = "https://jadwal-shalat-api.herokuapp.com/daily?date="+currentYear+"-"+currentMonth+"-"+today+"&cityId="+id;
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        try {
-                            JSONObject obj = response.getJSONObject("data");
-                            JSONArray array = obj.getJSONArray("data");
+                response -> {
+                    try {
+                        JSONObject obj = response.getJSONObject("data");
+                        JSONArray array = obj.getJSONArray("data");
 
-                            JSONObject indSubuh = array.getJSONObject(0);
-                            String dataJamSubuh = indSubuh.getString("time");
-                            jamSubuh.setText(dataJamSubuh);
-                            Date waktuSubuh = sdf.parse(dataJamSubuh);
+                        JSONObject indSubuh = array.getJSONObject(0);
+                        subuhTomorrow = indSubuh.getString("time");
 
-                            JSONObject indIsya = array.getJSONObject(4);
-                            String dataJamIsya = indIsya.getString("time");
-                            jamIsya.setText(dataJamIsya);
-                            Date waktuIsya = sdf.parse(dataJamIsya);
+                        JSONObject indDzuhur = array.getJSONObject(1);
+                        dzuhurTomorrow = indDzuhur.getString("time");
 
-                            Date currentHoursandMinute = sdf.parse(currentDateandTime);
-                            if (currentHoursandMinute.after(waktuIsya)){
-                                textSubuh.setTextColor(Color.parseColor("#FF018786"));
-                                textSubuh.setTypeface(null, Typeface.BOLD);
-                                jamSubuh.setTextColor(Color.parseColor("#FF018786"));
-                                jamSubuh.setTypeface(null, Typeface.BOLD);
-                                textSolat.setText("Subuh");
-                                textJam.setText(dataJamSubuh);
-                                DateTime targetDateTime = DateTime.parse(format("%s %s", current, dataJamSubuh), DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"));
-                                DateTime now = DateTime.now();
-                                Period period = new Period(now, targetDateTime);
-                                int jam = period.getHours();
-                                int menit = period.getMinutes();
-                                jamKecil.setText(jam+" Jam dan "+menit+" menit lagi");
-                            } else {
+                        JSONObject indAshar = array.getJSONObject(2);
+                        asharTomorrow = indAshar.getString("time");
 
-                            }
+                        JSONObject indMaghrib = array.getJSONObject(3);
+                        maghribTomorrow = indMaghrib.getString("time");
 
-                        } catch (JSONException | ParseException e) {
-                            e.printStackTrace();
-                        }
+                        JSONObject indIsya = array.getJSONObject(4);
+                        isyaTomorrow = indIsya.getString("time");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-            }
-        });
-
-        myQueue2.add(request);
+                }, Throwable::printStackTrace);
+        myQueue.add(request);
     }
 
-    private void bindExtra(){
+    private void BindExtra(){
+        TextView textKota = findViewById(R.id.TextKotaWaktu);
         Intent intent = getIntent();
-        kota = intent.getStringExtra(MainActivity.CITY_NAME_KEY);
+        String kota = intent.getStringExtra(MainActivity.CITY_NAME_KEY);
         textKota.setText(kota);
 
         id = intent.getStringExtra(MainActivity.ID_CITY_KEY);
